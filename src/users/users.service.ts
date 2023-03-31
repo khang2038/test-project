@@ -5,17 +5,18 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExistsExeption } from 'src/exeptions';
-import { Repository, FindOneOptions } from 'typeorm';
+import { Repository, FindOneOptions, Not } from 'typeorm';
 import { CreateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { SigninDto } from 'src/auth/dto/signin.dto';
 import { User } from './users.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>
   ) {}
 
   async getOneOrThrow(options: FindOneOptions<User>) {
@@ -31,20 +32,27 @@ export class UsersService {
     return user;
   }
 
-  async CheckUserNameExits(username: string) {
-    const user = await this.getOne({ where: { username: username } });
+  async CheckUserNameExits(username: string, userId?: string) {
+    const user = !userId
+      ? await this.getOne({ where: { username: username } })
+      : await this.getOne({
+          where: { username: username, id: userId && Not(userId) },
+        });
+
     if (user) {
-      return true;
+      throw new ExistsExeption('username is exists');
     }
-    return false;
   }
 
-  async CheckEmailExits(email: string) {
-    const user = await this.getOne({ where: { email: email } });
+  async CheckEmailExits(email: string, userId?: string) {
+    const user = !userId
+      ? await this.getOne({ where: { email: email } })
+      : await this.getOne({
+          where: { email: email, id: userId && Not(userId) },
+        });
     if (user) {
-      return true;
+      throw new ExistsExeption('username is exists');
     }
-    return false;
   }
 
   comparePassword = async (dto: SigninDto) => {
@@ -69,14 +77,24 @@ export class UsersService {
   };
 
   async createUser(dto: CreateUserDto) {
-    const CheckEmailExits = await this.CheckEmailExits(dto.email);
-    const CheckUserNameExits = await this.CheckUserNameExits(dto.username);
-    if ([CheckEmailExits, CheckUserNameExits].includes(true)) {
-      throw new ExistsExeption('email or username');
-    }
+    await this.CheckEmailExits(dto.email);
+    await this.CheckUserNameExits(dto.username);
     const user = new User();
     Object.assign(user, dto);
     user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
+    const saved = await this.userRepository.save(user);
+    delete saved.password;
+    return saved;
+  }
+
+  async updateProfileUser(dto: UpdateUserDto, user: User) {
+    if (dto.email) {
+      await this.CheckEmailExits(dto.email, user.id);
+    }
+    if (dto.username) {
+      await this.CheckUserNameExits(dto.username, user.id);
+    }
+    Object.assign(user, dto);
     const saved = await this.userRepository.save(user);
     delete saved.password;
     return saved;

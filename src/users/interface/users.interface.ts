@@ -1,5 +1,5 @@
 import { GetOption } from 'src/shares';
-import { User } from './users.entity';
+import { User } from '../users.entity';
 
 export enum EUserRole {
   OWNER = 'OWNER',
