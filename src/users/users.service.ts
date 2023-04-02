@@ -6,11 +6,13 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExistsExeption } from 'src/exeptions';
 import { Repository, FindOneOptions, Not } from 'typeorm';
-import { CreateUserDto } from './dto';
+import { CreateUserDto, UpdatePasswordUserDto, UpdateUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { SigninDto } from 'src/auth/dto/signin.dto';
 import { User } from './users.entity';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUsersDto } from './dto/get-users.dto';
+import { GetUserOptions } from './interface/users.interface';
+import { getLimitAndOffset } from 'src/shares/get-limit-and-offset';
 
 @Injectable()
 export class UsersService {
@@ -94,6 +96,13 @@ export class UsersService {
     if (dto.username) {
       await this.CheckUserNameExits(dto.username, user.id);
     }
+    Object.assign(user, dto);
+    const saved = await this.userRepository.save(user);
+    delete saved.password;
+    return saved;
+  }
+
+  async updatePassword(dto: UpdatePasswordUserDto, user: User) {
     Object.assign(user, dto);
     const saved = await this.userRepository.save(user);
     delete saved.password;
