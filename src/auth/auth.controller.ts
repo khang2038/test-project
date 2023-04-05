@@ -11,6 +11,7 @@ import { CreateUserDto } from 'src/users/dto';
 import { User } from 'src/users/users.entity';
 import { AuthService } from './auth.service';
 import { SigninDto } from './dto/signin.dto';
+import { GetAccessTokenDto } from './dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -37,5 +38,14 @@ export class AuthController {
   @Post('/signin')
   signin(@Body() dto: SigninDto) {
     return this.authService.signin(dto);
+  }
+
+  @ApiBody({ type: GetAccessTokenDto })
+  @ApiOkResponse({
+    description: 'get accessToken successfully',
+  })
+  @Post('/get-access-token')
+  getAccessToken(@Body() dto: GetAccessTokenDto) {
+    return this.authService.getAccessToken(dto);
   }
 }

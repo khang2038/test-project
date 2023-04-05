@@ -4,6 +4,7 @@ import {
   Get,
   Patch,
   Put,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './users.entity';
 import { UsersService } from './users.service';
 import { UpdatePasswordUserDto } from './dto/update-password-user.dto';
+import { GetUsersDto } from './dto/get-users.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -68,5 +70,19 @@ export class UsersController {
   async updatePassword(@Body() dto: UpdatePasswordUserDto, @Request() req) {
     await this.userService.updatePassword(dto, req.user);
     return 'successfully';
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @Get('/')
+  @ApiOkResponse({
+    description: 'get all user successfully.',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request.',
+  })
+  async getUsers(@Query() dto?: GetUsersDto) {
+    const users = await this.userService.getUsers(dto);
+    return users;
   }
 }

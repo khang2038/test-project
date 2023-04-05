@@ -108,4 +108,36 @@ export class UsersService {
     delete saved.password;
     return saved;
   }
+
+  async getUsers(dto?: GetUsersDto, option?: GetUserOptions) {
+    const query = this.userRepository.createQueryBuilder('u');
+    const { limit, offset } = getLimitAndOffset({
+      limit: dto.limit,
+      offset: dto.offset,
+    });
+
+    if (!option?.unlimited) {
+      query.skip(offset).take(limit);
+    }
+
+    if (dto?.q) {
+      query.andWhere(
+        '(u.fullname ILIKE :q OR u.username ILIKE :q OR u.email ILIKE :q)',
+        { q: `%${dto.q}%` }
+      );
+    }
+    if (dto?.status) {
+      query.andWhere('( u.status = :s)', { s: dto.status });
+    }
+    if (option?.id) {
+      query.andWhere('(u.id = :id)', { id: option.id });
+    }
+
+    const [users, count] = await query.getManyAndCount();
+
+    return {
+      users,
+      count,
+    };
+  }
 }
