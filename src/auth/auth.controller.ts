@@ -5,6 +5,7 @@ import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger/dist';
 import { CreateUserDto } from 'src/users/dto';
@@ -27,7 +28,8 @@ export class AuthController {
     description: 'Bad Request.',
   })
   @Post('/signup')
-  signup(@Body() dto: CreateUserDto) {
+  @ApiOperation({ summary: 'sign up ' })
+  signUp(@Body() dto: CreateUserDto) {
     return this.authService.signup(dto);
   }
 
@@ -36,7 +38,8 @@ export class AuthController {
     description: 'singin successfully',
   })
   @Post('/signin')
-  signin(@Body() dto: SigninDto) {
+  @ApiOperation({ summary: 'sign in' })
+  signIn(@Body() dto: SigninDto) {
     return this.authService.signin(dto);
   }
 
@@ -44,6 +47,7 @@ export class AuthController {
   @ApiOkResponse({
     description: 'get accessToken successfully',
   })
+  @ApiOperation({ summary: 'Get access token by refresh token' })
   @Post('/get-access-token')
   getAccessToken(@Body() dto: GetAccessTokenDto) {
     return this.authService.getAccessToken(dto);

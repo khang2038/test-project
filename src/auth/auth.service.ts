@@ -28,6 +28,7 @@ export class AuthService {
     const accessToken = await this.SignToken(user.id, user.username);
     const refreshToken = await this.SignRefreshToken(user.id, user.username);
     await this.cacheManager.set(getRefreshTokenKey(user.id), refreshToken);
+    console.log(await this.cacheManager.get(getRefreshTokenKey(user.id)));
     return {
       access_token: accessToken,
       refresh_token: refreshToken,

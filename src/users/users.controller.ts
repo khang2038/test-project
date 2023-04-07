@@ -13,6 +13,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
@@ -29,6 +30,7 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get profile of user' })
   @Get('/profile')
   @ApiOkResponse({
     description: 'User has been successfully created.',
@@ -45,11 +47,12 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
-  @Patch('/profile')
+  @Patch('/update-profile')
   @ApiCreatedResponse({
     description: 'User has been successfully created.',
     type: User,
   })
+  @ApiOperation({ summary: 'Update profile of user' })
   @ApiBadRequestResponse({
     description: 'Bad Request.',
   })
@@ -59,7 +62,7 @@ export class UsersController {
 
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
-  @Put('/password')
+  @Put('/update-password')
   @ApiOkResponse({
     description: 'User has been successfully updated passWord.',
     type: User,
@@ -67,6 +70,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Bad Request.',
   })
+  @ApiOperation({ summary: 'Update password of user' })
   async updatePassword(@Body() dto: UpdatePasswordUserDto, @Request() req) {
     await this.userService.updatePassword(dto, req.user);
     return 'successfully';
@@ -81,6 +85,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'Bad Request.',
   })
+  @ApiOperation({ summary: 'Get all user' })
   async getUsers(@Query() dto?: GetUsersDto) {
     const users = await this.userService.getUsers(dto);
     return users;
