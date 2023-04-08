@@ -22,6 +22,9 @@ import { User } from './users.entity';
 import { UsersService } from './users.service';
 import { UpdatePasswordUserDto } from './dto/update-password-user.dto';
 import { GetUsersDto } from './dto/get-users.dto';
+import { Roles } from 'src/decorators';
+import { EUserRole } from './interface/users.interface';
+import { RolesGuard } from 'src/auth/guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -76,7 +79,8 @@ export class UsersController {
     return 'successfully';
   }
 
-  @UseGuards(JwtGuard)
+  @Roles(EUserRole.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard)
   @ApiBearerAuth()
   @Get('/')
   @ApiOkResponse({
